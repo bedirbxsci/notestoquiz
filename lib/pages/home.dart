@@ -12,7 +12,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Text('Home Page: Previous questions will be displayed here'),
     );
   }
@@ -29,9 +29,9 @@ class _MainAppState extends State<MainApp> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    HomePage(),
-    ImageToText(),
-    ProfilePage(),
+    const HomePage(),
+    const ImageToText(),
+    const ProfilePage(),
   ];
 
   void _onTabTapped(int index) {
@@ -48,9 +48,9 @@ class _MainAppState extends State<MainApp> {
         onTap: _onTabTapped,
         currentIndex: _currentIndex,
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.camera), label: 'Quiz'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          const BottomNavigationBarItem(icon: Icon(Icons.camera), label: 'Quiz'),
+          const BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
