@@ -16,6 +16,8 @@
 	<string>Startup</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
+	<key>AppGroupIdentifier</key>
+	<string>group.com.ravnoorbedi.startup</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
