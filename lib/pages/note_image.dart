@@ -21,7 +21,7 @@ class _ImageToText extends State<ImageToText> {
   String _notes = '';
   bool loadingText = false;
 
-  Future getImage() async {
+  Future takeImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.camera);
 
     if (image != null) {
@@ -34,11 +34,42 @@ class _ImageToText extends State<ImageToText> {
       if (_image != null) {
         final recognizedText = await recognizeText(_image!);
         _notes += '$recognizedText + New Page';
+        setState(() {
+          loadingText = false;
+        });
       } else {
         print('No image selected');
       }
     }
   }
+
+Future<void> getImages() async {
+  final images = await ImagePicker().pickMultiImage();
+
+  if (images != null) {
+    int recognizedImages = 0;
+    setState(() {
+      loadingText = true;
+    });
+
+    for (var img in images) {
+      final imageFile = File(img.path);
+      final recognizedText = await recognizeText(imageFile);
+      print(recognizedText);
+      _responseText += recognizedText;
+      recognizedImages++;
+
+      if (recognizedImages == images.length) {
+        setState(() {
+          loadingText = false;
+        });
+      }
+    }
+  } else {
+    print('No images selected');
+  }
+}
+
 
   Future<String> recognizeText(File image) async {
     try {
@@ -47,9 +78,6 @@ class _ImageToText extends State<ImageToText> {
       final RecognizedText recognizedText =
           await textDetector.processImage(inputImage);
       textDetector.close();
-          setState(() {
-      loadingText = false;
-    });
       return recognizedText.text;
     } catch (e) {
       print('Error while recognizing text: $e');
@@ -122,8 +150,14 @@ class _ImageToText extends State<ImageToText> {
           children: <Widget>[
             _image == null ? Text('No image selected.') : Image.file(_image!),
             FloatingActionButton(
-              onPressed: getImage,
+              onPressed: takeImage,
               tooltip: 'Pick Image',
+              child: Icon(Icons.add_a_photo),
+              
+            ),
+            FloatingActionButton(
+              onPressed: getImages,
+              tooltip: 'Pick from Gallery',
               child: Icon(Icons.add_a_photo),
             ),
             SizedBox(height: 16),
