@@ -18,24 +18,22 @@ class _ImageToText extends State<ImageToText> {
   File? _image;
   String _responseText = '';
   List<Map<String, dynamic>> _questions = [];
+  String _notes = '';
+  bool loadingText = false;
 
   Future getImage() async {
     final image = await ImagePicker().pickImage(source: ImageSource.camera);
 
     if (image != null) {
+      
       setState(() {
         _image = File(image.path);
+       loadingText = true;
       });
 
       if (_image != null) {
         final recognizedText = await recognizeText(_image!);
-        print(recognizedText);
-        try {
-          sendRecognizedText(recognizedText, "AP Bio");
-        } catch (e) {
-          print('Error while sending recognized text: $e');
-          // You can also display the error to the user by updating the UI accordingly.
-        }
+        _notes += '$recognizedText + New Page';
       } else {
         print('No image selected');
       }
@@ -49,6 +47,9 @@ class _ImageToText extends State<ImageToText> {
       final RecognizedText recognizedText =
           await textDetector.processImage(inputImage);
       textDetector.close();
+          setState(() {
+      loadingText = false;
+    });
       return recognizedText.text;
     } catch (e) {
       print('Error while recognizing text: $e');
@@ -76,7 +77,8 @@ class _ImageToText extends State<ImageToText> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => QuestionsFlow(questions: _questions, currentQuestionIndex: 0),
+              builder: (context) =>
+                  QuestionsFlow(questions: _questions, currentQuestionIndex: 0),
             ),
           );
         }
@@ -126,12 +128,36 @@ class _ImageToText extends State<ImageToText> {
             ),
             SizedBox(height: 16),
             Text(_responseText),
+            !loadingText
+              ? ElevatedButton(
+                  onPressed: () {
+                    try {
+                      sendRecognizedText(_notes, "AP Bio");
+                    } catch (e) {
+                      print('Error while sending recognized text: $e');
+                      // You can also display the error to the user by updating the UI accordingly.
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                          30), // Adjust the corner radius as desired
+                    ),
+                  ),
+                  child: Text('Get Questions'),
+                )
+              : CircularProgressIndicator(),
           ],
         ),
       ),
     ));
   }
 }
+
+
+
+
 
 class QuestionsFlow extends StatefulWidget {
   final List<Map<String, dynamic>> questions;
@@ -168,9 +194,11 @@ class _QuestionsFlowState extends State<QuestionsFlow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Question ${widget.currentQuestionIndex + 1}')),
+      appBar:
+          AppBar(title: Text('Question ${widget.currentQuestionIndex + 1}')),
       body: QuestionAnswerPage(
-        question: widget.questions[widget.currentQuestionIndex]['question'] ?? '',
+        question:
+            widget.questions[widget.currentQuestionIndex]['question'] ?? '',
         answer: widget.questions[widget.currentQuestionIndex]['answer'] ?? '',
       ),
       bottomNavigationBar: BottomAppBar(
@@ -184,7 +212,8 @@ class _QuestionsFlowState extends State<QuestionsFlow> {
                 icon: Icon(Icons.arrow_back),
                 tooltip: 'Previous Question',
                 disabledColor: Colors.grey,
-                color: widget.currentQuestionIndex > 0 ? Colors.blue : Colors.grey,
+                color:
+                    widget.currentQuestionIndex > 0 ? Colors.blue : Colors.grey,
               ),
               IconButton(
                 onPressed: _nextQuestion,
